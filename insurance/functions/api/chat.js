@@ -59,7 +59,7 @@ export async function onRequestPost(context) {
         'X-Title': '大誠保險 AI 顧問',
       },
       body: JSON.stringify({
-        model: 'google/gemini-flash-2.0',
+        model: 'google/gemini-2.5-flash-lite',
         max_tokens: 600,
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
