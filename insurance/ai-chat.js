@@ -1,6 +1,10 @@
 (function () {
   'use strict';
   const API_ENDPOINT = '/api/chat';
+  // ★ LINE ID：正式上線前換成真實 LINE ID
+  const LINE_ID = '4931993194';
+  const LINE_URL = 'https://line.me/ti/p/~' + LINE_ID;
+
   let messages = [], isLoading = false;
   let chatBox, inputEl, sendBtn, loadingEl, formEl;
 
@@ -54,20 +58,15 @@
     formEl = document.createElement('div');
     formEl.className = 'ai-intake-form';
 
-    // 歡迎語
     const welcome = document.createElement('div');
     welcome.className = 'ai-intake-welcome';
     welcome.innerHTML = '你好！先了解你的狀況<br>才能給你最準確的建議 👋';
     formEl.appendChild(welcome);
 
-    // 年齡
     formEl.appendChild(renderGroup('age'));
-    // 家庭
     formEl.appendChild(renderGroup('family'));
-    // 主題（含子選項）
     formEl.appendChild(renderTopicGroup());
 
-    // 送出按鈕
     const submitBtn = document.createElement('button');
     submitBtn.className = 'ai-intake-submit';
     submitBtn.textContent = '開始諮詢';
@@ -117,12 +116,10 @@
     const btns = document.createElement('div');
     btns.className = 'ai-intake-btns';
 
-    // 子選項區
     const subWrap = document.createElement('div');
     subWrap.className = 'ai-intake-sub';
     subWrap.style.display = 'none';
 
-    // 其他輸入框
     const otherWrap = document.createElement('div');
     otherWrap.className = 'ai-intake-other-wrap';
     otherWrap.style.display = 'none';
@@ -222,8 +219,9 @@
       const text = data.text || '抱歉，暫時無法回應。';
       const question = data.question || null;
       const options = data.options || [];
-      const fullText = text;
-      appendMessage('assistant', fullText);
+
+      appendMessage('assistant', text);
+
       if (question && question.toLowerCase() !== 'null') {
         const qEl = document.createElement('div');
         qEl.className = 'ai-msg ai-msg--assistant';
@@ -234,8 +232,17 @@
         chatBox.appendChild(qEl);
         chatBox.scrollTop = chatBox.scrollHeight;
       }
-      messages.push({ role: 'assistant', content: question && question.toLowerCase() !== 'null' ? fullText + '\n\n' + question : fullText });
-      if (question && question.toLowerCase() !== 'null' && options.length > 0) showOptions(options);
+
+      messages.push({
+        role: 'assistant',
+        content: question && question.toLowerCase() !== 'null'
+          ? text + '\n\n' + question
+          : text,
+      });
+
+      if (question && question.toLowerCase() !== 'null' && options.length > 0) {
+        showOptions(options);
+      }
     } catch (err) {
       console.error('AI Chat Error:', err);
       appendMessage('assistant', '• 抱歉，連線發生問題\n• 請稍後再試\n• 或直接加 LINE 聯繫陳芊樺 😊');
@@ -271,32 +278,48 @@
     chatBox.scrollTop = chatBox.scrollHeight;
   }
 
+  /* ── 渲染訊息（含 LINE_CTA 卡片） ── */
   function appendMessage(role, text) {
     if (!chatBox) return;
     const wrap = document.createElement('div');
     wrap.className = 'ai-msg ai-msg--' + role;
     const bubble = document.createElement('div');
     bubble.className = 'ai-bubble';
+
     if (role === 'assistant') {
-      text.split('\n').filter(l => l.trim() && l.trim().toLowerCase() !== 'null').forEach(function (line) {
-        const clean = line.replace(/^•\s*/, '').trim();
-        if (clean === '[LINE_CTA]') {
-          const lineBtn = document.createElement('a');
-          lineBtn.href = 'https://line.me/ti/p/4931993194';
-          lineBtn.target = '_blank';
-          lineBtn.className = 'ai-line-btn';
-          lineBtn.innerHTML = '<span class="ai-line-icon">L</span> 加 LINE 預約陳芊樺免費諮詢';
-          bubble.appendChild(lineBtn);
-        } else {
-          const p = document.createElement('p');
-          p.textContent = clean;
-          if (line.trim().startsWith('•')) p.className = 'ai-bullet';
-          bubble.appendChild(p);
-        }
-      });
+      text.split('\n')
+        .filter(l => l.trim() && l.trim().toLowerCase() !== 'null')
+        .forEach(function (line) {
+          const clean = line.replace(/^[•♦]\s*/, '').trim();
+
+          // LINE_CTA → 完整卡片
+          if (clean === '[LINE_CTA]') {
+            const card = document.createElement('div');
+            card.className = 'ai-line-card';
+            card.innerHTML =
+              '<p class="ai-line-card-lead">想讓陳芊樺幫你看看保單狀況嗎？</p>' +
+              '<a href="' + LINE_URL + '" target="_blank" rel="noopener" class="ai-line-btn">' +
+              '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0">' +
+              '<path d="M12 2C6.48 2 2 6.1 2 11.2c0 3.28 1.67 6.18 4.27 8.04L5.2 22l3.09-1.62C9.38 20.78 10.67 21 12 21c5.52 0 10-4.1 10-9.2C22 6.1 17.52 2 12 2z"/>' +
+              '</svg>' +
+              '加 LINE 讓陳芊樺免費幫你健檢保單' +
+              '</a>' +
+              '<span class="ai-line-card-note">不推銷・不施壓・10 分鐘看完</span>';
+            bubble.appendChild(card);
+
+          } else {
+            const p = document.createElement('p');
+            p.textContent = clean;
+            if (line.trim().startsWith('•') || line.trim().startsWith('♦')) {
+              p.className = 'ai-bullet';
+            }
+            bubble.appendChild(p);
+          }
+        });
     } else {
       bubble.textContent = text;
     }
+
     wrap.appendChild(bubble);
     chatBox.appendChild(wrap);
     chatBox.scrollTop = chatBox.scrollHeight;
