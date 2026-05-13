@@ -210,16 +210,6 @@
       appendMessage('assistant', text);
 
       const hasQ = question && question.toLowerCase() !== 'null';
-      if (hasQ) {
-        const qEl = document.createElement('div');
-        qEl.className = 'ai-msg ai-msg--assistant';
-        const qBubble = document.createElement('div');
-        qBubble.className = 'ai-bubble ai-question';
-        qBubble.textContent = question;
-        qEl.appendChild(qBubble);
-        chatBox.appendChild(qEl);
-        chatBox.scrollTop = chatBox.scrollHeight;
-      }
 
       messages.push({ role: 'assistant', content: hasQ ? text + '\n\n' + question : text });
 
