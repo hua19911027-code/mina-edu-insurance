@@ -213,7 +213,7 @@
 
       messages.push({ role: 'assistant', content: hasQ ? text + '\n\n' + question : text });
 
-      if (hasQ && options.length > 0) showOptions(options);
+      if (hasQ && options.length > 0) showOptions(options, question);
 
     } catch (err) {
       console.error('AI Chat Error:', err);
@@ -223,9 +223,15 @@
     }
   }
 
-  function showOptions(options) {
+  function showOptions(options, question) {
     const wrap = document.createElement('div');
     wrap.className = 'ai-options';
+    if (question && question.toLowerCase() !== 'null') {
+      const qLabel = document.createElement('div');
+      qLabel.className = 'ai-options-question';
+      qLabel.textContent = question;
+      wrap.appendChild(qLabel);
+    }
 
     options.forEach(function (opt) {
       const isOther = opt.startsWith('自己補充');
