@@ -229,6 +229,26 @@ export async function onRequestPost(context) {
       parsed.text = cleanText;
     }
 
+    // options 為空但有 question → 根據 question 內容自動補選項
+    if (parsed.question && (!parsed.options || parsed.options.length === 0)) {
+      const q = parsed.question;
+      if (q.includes('保額') || q.includes('多少')) {
+        parsed.options = ['100-300萬', '300-500萬', '500萬以上', '不清楚', '自己補充（請在下方輸入）'];
+      } else if (q.includes('超額責任險') || q.includes('有沒有')) {
+        parsed.options = ['有保', '沒有，不知道這個', '不確定', '自己補充（請在下方輸入）'];
+      } else if (q.includes('醫療') && q.includes('類型')) {
+        parsed.options = ['住院日額', '實支實付', '兩種都有', '不確定有沒有', '自己補充（請在下方輸入）'];
+      } else if (q.includes('顧慮') || q.includes('擔心')) {
+        parsed.options = ['怕買錯或重複', '不知道額度夠不夠', '覺得保費太貴', '不知從哪開始', '自己補充（請在下方輸入）'];
+      } else if (q.includes('保險') && (q.includes('有沒有') || q.includes('投保'))) {
+        parsed.options = ['有，但不確定夠不夠', '有，想檢視一下', '完全沒有', '自己補充（請在下方輸入）'];
+      } else if (q.includes('更新') || q.includes('調整') || q.includes('檢視')) {
+        parsed.options = ['最近一年內', '買的時候設定後沒動過', '不記得了', '自己補充（請在下方輸入）'];
+      } else {
+        parsed.options = ['了解，想多知道一點', '有類似狀況', '我的狀況不太一樣', '自己補充（請在下方輸入）'];
+      }
+    }
+
     return new Response(JSON.stringify(parsed), { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
 
   } catch (err) {
