@@ -213,11 +213,13 @@ export async function onRequestPost(context) {
       // 移除 text 結尾的 JSON 陣列（例如 ["100-300萬","300-500萬",...]）
       cleanText = cleanText.replace(/\[\s*"[^"]*"[^\]]*\]\s*$/, '').trim();
 
-      // 移除 text 結尾的問句（問號結尾的句子）並搬到 question
-      const lastSentenceMatch = cleanText.match(/([^。！？\n]+[？?])\s*$/);
-      if (lastSentenceMatch && !parsed.question) {
-        parsed.question = lastSentenceMatch[1].trim();
-        cleanText = cleanText.slice(0, cleanText.length - lastSentenceMatch[0].length).trim();
+      // 移除 text 最後一行是純問句（不含 • 符號）才搬到 question
+      const lines = cleanText.split('\n');
+      const lastLine = lines[lines.length - 1].trim();
+      if (lastLine && !lastLine.startsWith('•') && !lastLine.startsWith('♦') && lastLine.match(/[？?]$/) && !parsed.question) {
+        parsed.question = lastLine;
+        lines.pop();
+        cleanText = lines.join('\n').trim();
       }
 
       // 移除內心獨白（括號包起來的說明）
