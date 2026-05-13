@@ -213,9 +213,26 @@ export async function onRequestPost(context) {
       // 移除 text 結尾的 JSON 陣列（例如 ["100-300萬","300-500萬",...]）
       cleanText = cleanText.replace(/\[\s*"[^"]*"[^\]]*\]\s*$/, '').trim();
 
+      // 移除 AI 把 question/options 當純文字寫進 text 的情況
+      // 例如：
+question
+目前汽車...
+options
+      cleanText = cleanText.replace(/\n?question\n([^\n]+)\n?options?\n?/i, (match, q) => {
+        if (!parsed.question) parsed.question = q.trim();
+        return '';
+      });
+      // 也處理只有 question 沒有 options 的情況
+      cleanText = cleanText.replace(/\n?question\n([^\n]+)$/i, (match, q) => {
+        if (!parsed.question) parsed.question = q.trim();
+        return '';
+      });
+      // 移除結尾殘留的 options 字樣
+      cleanText = cleanText.replace(/\n?options?\s*$/i, '').trim();
+
       // 移除 text 最後一行是純問句（不含 • 符號）才搬到 question
-      const lines = cleanText.split('\n');
-      const lastLine = lines[lines.length - 1].trim();
+      const lines = cleanText.split('\n').filter(l => l.trim());
+      const lastLine = lines[lines.length - 1] ? lines[lines.length - 1].trim() : '';
       if (lastLine && !lastLine.startsWith('•') && !lastLine.startsWith('♦') && lastLine.match(/[？?]$/) && !parsed.question) {
         parsed.question = lastLine;
         lines.pop();
@@ -226,7 +243,7 @@ export async function onRequestPost(context) {
       cleanText = cleanText.replace(/（[^）]{0,100}）\n?/g, '').trim();
       cleanText = cleanText.replace(/\([^)]{0,100}\)\n?/g, '').trim();
 
-      parsed.text = cleanText;
+      parsed.text = cleanText.trim();
     }
 
     // options 為空但有 question → 根據 question 內容自動補選項
