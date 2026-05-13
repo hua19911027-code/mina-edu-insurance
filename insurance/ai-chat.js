@@ -213,7 +213,16 @@
 
       messages.push({ role: 'assistant', content: hasQ ? text + '\n\n' + question : text });
 
-      if (hasQ && options.length > 0) showOptions(options, question);
+      // 有問題就一定要顯示選項；AI 沒給 options 時補通用後備選項
+      if (hasQ) {
+        const finalOptions = options.length > 0 ? options : [
+          '有印象，大概了解',
+          '沒聽過這個',
+          '想多了解一點',
+          '自己補充（請在下方輸入）'
+        ];
+        showOptions(finalOptions, question);
+      }
 
     } catch (err) {
       console.error('AI Chat Error:', err);
