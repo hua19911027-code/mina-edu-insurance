@@ -196,12 +196,35 @@ export async function onRequestPost(context) {
     const data = await response.json();
     let raw = (data.choices?.[0]?.message?.content || '{}').trim();
     let parsed;
+
+    // 第一層：嘗試 JSON parse
     try { parsed = JSON.parse(raw); }
     catch (_) {
       const fence = raw.match(/```(?:json)?\s*([\s\S]*?)```/i);
       if (fence) { try { parsed = JSON.parse(fence[1].trim()); } catch (_) {} }
       if (!parsed) { const brace = raw.match(/\{[\s\S]*\}/); if (brace) { try { parsed = JSON.parse(brace[0]); } catch (_) {} } }
       if (!parsed) { parsed = { text: raw, question: null, options: [] }; }
+    }
+
+    // 第二層：強制清理 text，把 AI 亂塞進去的 question/options 剝離
+    if (parsed.text) {
+      let cleanText = parsed.text;
+
+      // 移除 text 結尾的 JSON 陣列（例如 ["100-300萬","300-500萬",...]）
+      cleanText = cleanText.replace(/\[\s*"[^"]*"[^\]]*\]\s*$/, '').trim();
+
+      // 移除 text 結尾的問句（問號結尾的句子）並搬到 question
+      const lastSentenceMatch = cleanText.match(/([^。！？\n]+[？?])\s*$/);
+      if (lastSentenceMatch && !parsed.question) {
+        parsed.question = lastSentenceMatch[1].trim();
+        cleanText = cleanText.slice(0, cleanText.length - lastSentenceMatch[0].length).trim();
+      }
+
+      // 移除內心獨白（括號包起來的說明）
+      cleanText = cleanText.replace(/（[^）]{0,100}）\n?/g, '').trim();
+      cleanText = cleanText.replace(/\([^)]{0,100}\)\n?/g, '').trim();
+
+      parsed.text = cleanText;
     }
 
     return new Response(JSON.stringify(parsed), { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
