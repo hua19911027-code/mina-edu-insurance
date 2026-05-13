@@ -77,8 +77,12 @@ export async function onRequestPost(context) {
 ## 保費數字規則
 - 如果回應中出現任何保費金額、保障額度、試算數字，text 最後一點必須加：
   「• 以上金額僅供參考，實際保費依保險公司核保結果及條款為準」
-- 超額責任險費率範例（可使用）：1000萬保額一年約 2000-4000 元；上億保額一年約 5000-8000 元
-- 第三人責任險費率範例（可使用）：500萬保額一年約 3000-6000 元，依車型和年齡不同
+- 超額責任險費率範例（可使用，來源：市場行情）：
+  　1000萬保額一年約 3000-6000 元
+  　3000萬保額一年約 8000-15000 元
+  　上億保額一年約 15000-30000 元（依保險公司和核保條件不同）
+- 第三人責任險費率範例（可使用）：500萬保額一年約 3000-8000 元，依車型、年齡、車齡不同
+- 禁止自行捏造或縮小保費數字，寧可說「約幾千到幾萬元」也不能給錯誤的具體數字
 
 ## 開場白規則（最高優先，不得違反）
 - text 的第一行絕對不加 • ♦ 任何符號，直接寫完整句子
@@ -249,18 +253,26 @@ options
     // options 為空但有 question → 根據 question 內容自動補選項
     if (parsed.question && (!parsed.options || parsed.options.length === 0)) {
       const q = parsed.question;
-      if (q.includes('保額') || q.includes('多少')) {
+      if (q.includes('習慣') || q.includes('頻率') || q.includes('里程') || q.includes('開車')) {
+        parsed.options = ['每天通勤使用', '假日偶爾開', '長途為主', '市區短程為主', '自己補充（請在下方輸入）'];
+      } else if (q.includes('機車') && (q.includes('投保') || q.includes('保險') || q.includes('有沒有'))) {
+        parsed.options = ['有保第三人責任險', '只有強制險', '不確定有什麼', '自己補充（請在下方輸入）'];
+      } else if (q.includes('車位') || q.includes('停車')) {
+        parsed.options = ['有固定車位', '停路邊或停車場', '公司有停車場', '自己補充（請在下方輸入）'];
+      } else if (q.includes('保額') || q.includes('多少')) {
         parsed.options = ['100-300萬', '300-500萬', '500萬以上', '不清楚', '自己補充（請在下方輸入）'];
-      } else if (q.includes('超額責任險') || q.includes('有沒有')) {
+      } else if (q.includes('超額責任險') || q.includes('有沒有另外')) {
         parsed.options = ['有保', '沒有，不知道這個', '不確定', '自己補充（請在下方輸入）'];
       } else if (q.includes('醫療') && q.includes('類型')) {
         parsed.options = ['住院日額', '實支實付', '兩種都有', '不確定有沒有', '自己補充（請在下方輸入）'];
-      } else if (q.includes('顧慮') || q.includes('擔心')) {
+      } else if (q.includes('顧慮') || q.includes('擔心') || q.includes('在意')) {
         parsed.options = ['怕買錯或重複', '不知道額度夠不夠', '覺得保費太貴', '不知從哪開始', '自己補充（請在下方輸入）'];
-      } else if (q.includes('保險') && (q.includes('有沒有') || q.includes('投保'))) {
+      } else if (q.includes('投保') || (q.includes('保險') && q.includes('有'))) {
         parsed.options = ['有，但不確定夠不夠', '有，想檢視一下', '完全沒有', '自己補充（請在下方輸入）'];
       } else if (q.includes('更新') || q.includes('調整') || q.includes('檢視')) {
         parsed.options = ['最近一年內', '買的時候設定後沒動過', '不記得了', '自己補充（請在下方輸入）'];
+      } else if (q.includes('意願') || q.includes('想不想') || q.includes('有興趣')) {
+        parsed.options = ['有興趣了解', '想先多了解再決定', '目前還在考慮', '自己補充（請在下方輸入）'];
       } else {
         parsed.options = ['了解，想多知道一點', '有類似狀況', '我的狀況不太一樣', '自己補充（請在下方輸入）'];
       }
