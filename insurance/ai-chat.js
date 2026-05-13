@@ -306,7 +306,14 @@
         .filter(l => l.trim() && l.trim().toLowerCase() !== 'null')
         .forEach(function (line) {
           const clean = line.replace(/^[•♦]\s*/, '').trim();
-          if (clean === '[LINE_CTA]') {
+          if (clean === '[INTRO]') {
+            const intro = document.createElement('div');
+            intro.className = 'ai-advisor-intro';
+            intro.innerHTML =
+              '<span class="ai-advisor-intro-icon">芊</span>' +
+              '<span class="ai-advisor-intro-label">關於陳芊樺顧問</span>';
+            bubble.appendChild(intro);
+          } else if (clean === '[LINE_CTA]') {
             const card = document.createElement('div');
             card.className = 'ai-line-card';
             card.innerHTML =
@@ -317,7 +324,7 @@
               '</svg>' +
               '加 LINE 讓陳芊樺免費幫你健檢保單' +
               '</a>' +
-              '<span class="ai-line-card-note">不推銷・不施壓・10 分鐘看完</span>';
+              '<span class="ai-line-card-note">不推銷・不施壓・只在乎你的感受</span>';
             bubble.appendChild(card);
           } else {
             const p = document.createElement('p');
