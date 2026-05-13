@@ -279,10 +279,20 @@
     bubble.className = 'ai-bubble';
     if (role === 'assistant') {
       text.split('\n').filter(l => l.trim() && l.trim().toLowerCase() !== 'null').forEach(function (line) {
-        const p = document.createElement('p');
-        p.textContent = line.replace(/^•\s*/, '');
-        if (line.trim().startsWith('•')) p.className = 'ai-bullet';
-        bubble.appendChild(p);
+        const clean = line.replace(/^•\s*/, '').trim();
+        if (clean === '[LINE_CTA]') {
+          const lineBtn = document.createElement('a');
+          lineBtn.href = 'https://line.me/ti/p/4931993194';
+          lineBtn.target = '_blank';
+          lineBtn.className = 'ai-line-btn';
+          lineBtn.innerHTML = '<span class="ai-line-icon">L</span> 加 LINE 預約陳芊樺免費諮詢';
+          bubble.appendChild(lineBtn);
+        } else {
+          const p = document.createElement('p');
+          p.textContent = clean;
+          if (line.trim().startsWith('•')) p.className = 'ai-bullet';
+          bubble.appendChild(p);
+        }
       });
     } else {
       bubble.textContent = text;
