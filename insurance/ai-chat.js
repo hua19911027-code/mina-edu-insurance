@@ -222,10 +222,20 @@
       const text = data.text || '抱歉，暫時無法回應。';
       const question = data.question || null;
       const options = data.options || [];
-      const fullText = question ? text + '\n\n' + question : text;
+      const fullText = text;
       appendMessage('assistant', fullText);
-      messages.push({ role: 'assistant', content: fullText });
-      if (question && options.length > 0) showOptions(options);
+      if (question && question.toLowerCase() !== 'null') {
+        const qEl = document.createElement('div');
+        qEl.className = 'ai-msg ai-msg--assistant';
+        const qBubble = document.createElement('div');
+        qBubble.className = 'ai-bubble ai-question';
+        qBubble.textContent = question;
+        qEl.appendChild(qBubble);
+        chatBox.appendChild(qEl);
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }
+      messages.push({ role: 'assistant', content: question && question.toLowerCase() !== 'null' ? fullText + '\n\n' + question : fullText });
+      if (question && question.toLowerCase() !== 'null' && options.length > 0) showOptions(options);
     } catch (err) {
       console.error('AI Chat Error:', err);
       appendMessage('assistant', '• 抱歉，連線發生問題\n• 請稍後再試\n• 或直接加 LINE 聯繫陳芊樺 😊');
@@ -268,7 +278,7 @@
     const bubble = document.createElement('div');
     bubble.className = 'ai-bubble';
     if (role === 'assistant') {
-      text.split('\n').filter(l => l.trim()).forEach(function (line) {
+      text.split('\n').filter(l => l.trim() && l.trim().toLowerCase() !== 'null').forEach(function (line) {
         const p = document.createElement('p');
         p.textContent = line.replace(/^•\s*/, '');
         if (line.trim().startsWith('•')) p.className = 'ai-bullet';
