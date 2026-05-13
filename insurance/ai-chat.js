@@ -1,7 +1,6 @@
 (function () {
   'use strict';
   const API_ENDPOINT = '/api/chat';
-  // ★ LINE ID：正式上線前換成真實 LINE ID
   const LINE_ID = '4931993194';
   const LINE_URL = 'https://line.me/ti/p/~' + LINE_ID;
 
@@ -53,27 +52,22 @@
     }
   }
 
-  /* ── 開場表單 ── */
   function renderIntakeForm() {
     formEl = document.createElement('div');
     formEl.className = 'ai-intake-form';
-
     const welcome = document.createElement('div');
     welcome.className = 'ai-intake-welcome';
     welcome.innerHTML = '你好！先了解你的狀況<br>才能給你最準確的建議 👋';
     formEl.appendChild(welcome);
-
     formEl.appendChild(renderGroup('age'));
     formEl.appendChild(renderGroup('family'));
     formEl.appendChild(renderTopicGroup());
-
     const submitBtn = document.createElement('button');
     submitBtn.className = 'ai-intake-submit';
     submitBtn.textContent = '開始諮詢';
     submitBtn.disabled = true;
     submitBtn.addEventListener('click', submitIntake);
     formEl.appendChild(submitBtn);
-
     chatBox.appendChild(formEl);
     chatBox.scrollTop = chatBox.scrollHeight;
   }
@@ -112,14 +106,11 @@
     lbl.className = 'ai-intake-label';
     lbl.textContent = g.label;
     wrap.appendChild(lbl);
-
     const btns = document.createElement('div');
     btns.className = 'ai-intake-btns';
-
     const subWrap = document.createElement('div');
     subWrap.className = 'ai-intake-sub';
     subWrap.style.display = 'none';
-
     const otherWrap = document.createElement('div');
     otherWrap.className = 'ai-intake-other-wrap';
     otherWrap.style.display = 'none';
@@ -131,7 +122,6 @@
       checkSubmit();
     });
     otherWrap.appendChild(otherInput);
-
     g.options.forEach(function (opt) {
       const btn = document.createElement('button');
       btn.className = 'ai-intake-btn';
@@ -144,7 +134,6 @@
         subWrap.style.display = 'none';
         subWrap.innerHTML = '';
         otherWrap.style.display = 'none';
-
         if (opt === '其他') {
           otherWrap.style.display = 'block';
           otherInput.focus();
@@ -166,7 +155,6 @@
       });
       btns.appendChild(btn);
     });
-
     wrap.appendChild(btns);
     wrap.appendChild(subWrap);
     wrap.appendChild(otherWrap);
@@ -187,7 +175,6 @@
     const subs = INTAKE.topic.subSelected;
     const detail = subs.length ? `（${subs.join('、')}）` : '';
     const summary = `年齡：${age}｜家庭：${family}｜想了解：${topic}${detail}`;
-
     formEl.remove();
     formEl = null;
     appendMessage('user', summary);
@@ -195,12 +182,12 @@
     sendToAPI(messages);
   }
 
-  /* ── 一般對話 ── */
   async function sendMessage() {
     if (!inputEl || isLoading) return;
     const text = inputEl.value.trim();
     if (!text) return;
     inputEl.value = '';
+    inputEl.placeholder = '輸入你的問題…';
     appendMessage('user', text);
     messages.push({ role: 'user', content: text });
     sendToAPI(messages);
@@ -222,7 +209,8 @@
 
       appendMessage('assistant', text);
 
-      if (question && question.toLowerCase() !== 'null') {
+      const hasQ = question && question.toLowerCase() !== 'null';
+      if (hasQ) {
         const qEl = document.createElement('div');
         qEl.className = 'ai-msg ai-msg--assistant';
         const qBubble = document.createElement('div');
@@ -233,16 +221,10 @@
         chatBox.scrollTop = chatBox.scrollHeight;
       }
 
-      messages.push({
-        role: 'assistant',
-        content: question && question.toLowerCase() !== 'null'
-          ? text + '\n\n' + question
-          : text,
-      });
+      messages.push({ role: 'assistant', content: hasQ ? text + '\n\n' + question : text });
 
-      if (question && question.toLowerCase() !== 'null' && options.length > 0) {
-        showOptions(options);
-      }
+      if (hasQ && options.length > 0) showOptions(options);
+
     } catch (err) {
       console.error('AI Chat Error:', err);
       appendMessage('assistant', '• 抱歉，連線發生問題\n• 請稍後再試\n• 或直接加 LINE 聯繫陳芊樺 😊');
@@ -254,16 +236,49 @@
   function showOptions(options) {
     const wrap = document.createElement('div');
     wrap.className = 'ai-options';
+
     options.forEach(function (opt) {
+      const isOther = opt.startsWith('自己補充');
       const btn = document.createElement('button');
-      btn.className = 'ai-option-btn';
+      btn.className = 'ai-option-btn' + (isOther ? ' ai-option-other' : '');
       btn.textContent = opt;
-      if (opt === '自己說說看（可不填）') {
-        btn.classList.add('ai-option-other');
+
+      if (isOther) {
+        // 「自己補充」按鈕：點了以後在選項下方出現輸入框
         btn.addEventListener('click', function () {
-          wrap.remove();
-          inputEl.placeholder = '想補充什麼都可以，不填直接送出也 OK';
-          inputEl.focus();
+          if (wrap.querySelector('.ai-option-inline-input')) return; // 避免重複
+          btn.classList.add('active');
+
+          const inlineWrap = document.createElement('div');
+          inlineWrap.className = 'ai-option-inline-wrap';
+
+          const inlineInput = document.createElement('input');
+          inlineInput.className = 'ai-option-inline-input';
+          inlineInput.placeholder = '請在這裡輸入你的回答…';
+          inlineInput.autofocus = true;
+
+          const inlineSend = document.createElement('button');
+          inlineSend.className = 'ai-option-inline-send';
+          inlineSend.textContent = '送出';
+
+          function submitInline() {
+            const val = inlineInput.value.trim();
+            if (!val) return;
+            wrap.remove();
+            inputEl.value = val;
+            sendMessage();
+          }
+
+          inlineSend.addEventListener('click', submitInline);
+          inlineInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') { e.preventDefault(); submitInline(); }
+          });
+
+          inlineWrap.appendChild(inlineInput);
+          inlineWrap.appendChild(inlineSend);
+          wrap.appendChild(inlineWrap);
+          chatBox.scrollTop = chatBox.scrollHeight;
+          setTimeout(() => inlineInput.focus(), 50);
         });
       } else {
         btn.addEventListener('click', function () {
@@ -274,11 +289,11 @@
       }
       wrap.appendChild(btn);
     });
+
     chatBox.appendChild(wrap);
     chatBox.scrollTop = chatBox.scrollHeight;
   }
 
-  /* ── 渲染訊息（含 LINE_CTA 卡片） ── */
   function appendMessage(role, text) {
     if (!chatBox) return;
     const wrap = document.createElement('div');
@@ -291,8 +306,6 @@
         .filter(l => l.trim() && l.trim().toLowerCase() !== 'null')
         .forEach(function (line) {
           const clean = line.replace(/^[•♦]\s*/, '').trim();
-
-          // LINE_CTA → 完整卡片
           if (clean === '[LINE_CTA]') {
             const card = document.createElement('div');
             card.className = 'ai-line-card';
@@ -306,13 +319,10 @@
               '</a>' +
               '<span class="ai-line-card-note">不推銷・不施壓・10 分鐘看完</span>';
             bubble.appendChild(card);
-
           } else {
             const p = document.createElement('p');
             p.textContent = clean;
-            if (line.trim().startsWith('•') || line.trim().startsWith('♦')) {
-              p.className = 'ai-bullet';
-            }
+            if (line.trim().startsWith('•') || line.trim().startsWith('♦')) p.className = 'ai-bullet';
             bubble.appendChild(p);
           }
         });

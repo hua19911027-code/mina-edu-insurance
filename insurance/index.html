@@ -1031,6 +1031,43 @@
     color: #6a9478;
     letter-spacing: 0.03em;
   }
+
+  /* ── 選項內嵌輸入框 ── */
+  .ai-option-inline-wrap {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    width: 100%;
+  }
+  .ai-option-inline-input {
+    flex: 1;
+    padding: 9px 14px;
+    border: 1.5px solid var(--gold);
+    border-radius: 999px;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    background: #fff;
+    color: var(--ink);
+  }
+  .ai-option-inline-input:focus {
+    border-color: var(--primary);
+  }
+  .ai-option-inline-send {
+    padding: 9px 18px;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .ai-option-inline-send:hover {
+    background: var(--primary-700);
+  }
+
 </style>
 </head>
 <body>
