@@ -25,20 +25,22 @@
   };
 
   function init() {
-    const trigger = document.querySelector('[data-edu-trigger]');
     const modal = document.getElementById('edu-chat-modal');
     const closeBtn = document.getElementById('edu-chat-close');
     chatBox = document.getElementById('edu-chat-messages');
     inputEl = document.getElementById('edu-chat-input');
     sendBtn = document.getElementById('edu-chat-send');
     loadingEl = document.getElementById('edu-chat-loading');
-    if (!trigger || !modal) return;
+    if (!modal) return;
 
-    trigger.addEventListener('click', function (e) {
-      e.preventDefault();
-      modal.classList.add('open');
-      if (messages.length === 0) renderIntakeForm();
-      setTimeout(() => inputEl && inputEl.focus(), 300);
+    // 所有 data-edu-trigger 元素都觸發同一個 modal
+    document.querySelectorAll('[data-edu-trigger]').forEach(function(trigger) {
+      trigger.addEventListener('click', function (e) {
+        e.preventDefault();
+        modal.classList.add('open');
+        if (messages.length === 0 && !formEl) renderIntakeForm();
+        setTimeout(() => inputEl && inputEl.focus(), 300);
+      });
     });
 
     if (closeBtn) closeBtn.addEventListener('click', () => modal.classList.remove('open'));
@@ -50,15 +52,7 @@
       });
     }
 
-    // float-chat 按鈕也觸發
-    const floatBtn = document.querySelector('.float-chat');
-    if (floatBtn) {
-      floatBtn.addEventListener('click', function (e) {
-        e.preventDefault();
-        modal.classList.add('open');
-        if (messages.length === 0) renderIntakeForm();
-      });
-    }
+
   }
 
   function renderIntakeForm() {
