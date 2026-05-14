@@ -20,8 +20,9 @@
     },
     concern: {
       label: '③ 目前最擔心的是？',
-      options: ['跟不上學校進度', '成績起伏大', '孩子不愛讀書', '想提前打好基礎', '放學沒人照顧'],
-      selected: null
+      options: ['跟不上學校進度', '成績起伏大', '孩子不愛讀書', '想提前打好基礎', '放學沒人照顧', '自己說說看（可在下方輸入）'],
+      selected: null,
+      hasOther: true
     }
   };
 
@@ -88,26 +89,52 @@
     wrap.appendChild(lbl);
     const btns = document.createElement('div');
     btns.className = 'edu-intake-btns';
+
+    // 自填輸入框（concern 用）
+    const otherWrap = document.createElement('div');
+    otherWrap.style.display = 'none';
+    otherWrap.style.marginTop = '8px';
+    const otherInput = document.createElement('input');
+    otherInput.className = 'edu-intake-other-input';
+    otherInput.placeholder = '請輸入你的狀況…';
+    otherInput.addEventListener('input', function () {
+      if (otherInput.value.trim()) {
+        g.selected = otherInput.value.trim();
+      } else {
+        g.selected = null;
+      }
+      checkSubmit();
+    });
+    otherWrap.appendChild(otherInput);
+
     g.options.forEach(function (opt) {
+      const isOther = opt.startsWith('自己說說看');
       const btn = document.createElement('button');
-      btn.className = 'edu-intake-btn';
+      btn.className = 'edu-intake-btn' + (isOther ? ' edu-intake-btn-other' : '');
       btn.textContent = opt;
       btn.addEventListener('click', function () {
         if (g.multi) {
-          // 複選模式
           btn.classList.toggle('selected');
           g.selected = Array.from(btns.querySelectorAll('.edu-intake-btn.selected')).map(b => b.textContent);
         } else {
-          // 單選模式
           btns.querySelectorAll('.edu-intake-btn').forEach(b => b.classList.remove('selected'));
           btn.classList.add('selected');
-          g.selected = opt;
+          if (isOther && g.hasOther) {
+            otherWrap.style.display = 'block';
+            g.selected = null;
+            setTimeout(() => otherInput.focus(), 50);
+          } else {
+            otherWrap.style.display = 'none';
+            g.selected = opt;
+          }
         }
         checkSubmit();
       });
       btns.appendChild(btn);
     });
+
     wrap.appendChild(btns);
+    if (g.hasOther) wrap.appendChild(otherWrap);
     return wrap;
   }
 
