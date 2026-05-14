@@ -326,6 +326,7 @@
       const qLabel = document.createElement('div');
       qLabel.className = 'edu-options-question';
       qLabel.textContent = question;
+      qLabel.style.cssText = 'font-size:16px;font-weight:800;background:#5B1A3A;color:#fff;padding:12px 16px;border-radius:10px;margin-bottom:12px;line-height:1.5;display:block;';
       wrap.appendChild(qLabel);
     }
     options.forEach(function(opt) {
