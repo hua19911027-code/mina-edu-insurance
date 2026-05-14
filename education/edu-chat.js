@@ -349,7 +349,11 @@
             const val = inlineInput.value.trim();
             if (!val) return;
             wrap.remove();
-            handleOptionClick(val);
+            // 自填內容 → 直接走 AI
+            appendMessage('user', val);
+            freeRound++;
+            messages.push({ role: 'user', content: val });
+            callAI();
           }
           inlineSend.addEventListener('click', submitInline);
           inlineInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); submitInline(); } });
