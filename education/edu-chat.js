@@ -1,7 +1,7 @@
 (function () {
   'use strict';
   const API_ENDPOINT = '/api/chat';
-  const LINE_URL = 'https://line.me/R/ti/p/@590binwn';
+  const LINE_URL = 'https://line.me/R/ti/p/@590binwn'; // LINE 官方帳號
 
   let messages = [], isLoading = false;
   let chatBox, inputEl, sendBtn, loadingEl, formEl;
@@ -284,9 +284,9 @@
             '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0">' +
             '<path d="M12 2C6.48 2 2 6.1 2 11.2c0 3.28 1.67 6.18 4.27 8.04L5.2 22l3.09-1.62C9.38 20.78 10.67 21 12 21c5.52 0 10-4.1 10-9.2C22 6.1 17.52 2 12 2z"/>' +
             '</svg>' +
-            '加 LINE 預約免費試聽' +
+            '點這裡加 LINE・預約免費試聽' +
             '</a>' +
-            '<span class="edu-line-card-note">不用決定、不用準備・來試一堂就知道</span>';
+            '<span class="edu-line-card-note">不用決定・不用準備・來試一堂就知道</span>';
           bubble.appendChild(card);
         } else if (clean === '[DIVIDER]') {
           const hr = document.createElement('div');
