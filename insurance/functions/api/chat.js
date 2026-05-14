@@ -229,7 +229,7 @@ text 結構：
         'X-Title': '大誠保險AI顧問',
       },
       body: JSON.stringify({
-        model: 'anthropic/claude-haiku-4-5',
+        model: 'google/gemini-2.5-flash-lite',
         max_tokens: 900,
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
