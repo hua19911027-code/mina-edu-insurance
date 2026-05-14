@@ -14,7 +14,7 @@
     },
     subject: {
       label: '② 想加強哪個科目？',
-      options: ['英文', '數學', '英文 + 數學'],
+      options: ['英文', '數學', '英文 + 數學', '安親', '安親 + 英文', '安親 + 數學'],
       selected: null
     },
     concern: {
