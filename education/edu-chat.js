@@ -13,13 +13,14 @@
       selected: null
     },
     subject: {
-      label: '② 想加強哪個科目？',
-      options: ['英文', '數學', '英文 + 數學', '安親', '安親 + 英文', '安親 + 數學'],
-      selected: null
+      label: '② 想加強哪個科目？（可複選）',
+      options: ['英文', '數學', '安親'],
+      selected: [],
+      multi: true
     },
     concern: {
       label: '③ 目前最擔心的是？',
-      options: ['跟不上學校進度', '成績起伏大', '孩子不愛讀書', '想提前打好基礎', '其他'],
+      options: ['跟不上學校進度', '成績起伏大', '孩子不愛讀書', '想提前打好基礎', '放學沒人照顧'],
       selected: null
     }
   };
@@ -92,9 +93,16 @@
       btn.className = 'edu-intake-btn';
       btn.textContent = opt;
       btn.addEventListener('click', function () {
-        btns.querySelectorAll('.edu-intake-btn').forEach(b => b.classList.remove('selected'));
-        btn.classList.add('selected');
-        g.selected = opt;
+        if (g.multi) {
+          // 複選模式
+          btn.classList.toggle('selected');
+          g.selected = Array.from(btns.querySelectorAll('.edu-intake-btn.selected')).map(b => b.textContent);
+        } else {
+          // 單選模式
+          btns.querySelectorAll('.edu-intake-btn').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+          g.selected = opt;
+        }
         checkSubmit();
       });
       btns.appendChild(btn);
@@ -106,12 +114,18 @@
   function checkSubmit() {
     if (!formEl) return;
     const btn = formEl.querySelector('.edu-intake-submit');
-    const ok = INTAKE.grade.selected && INTAKE.subject.selected && INTAKE.concern.selected;
+    const subjectOk = Array.isArray(INTAKE.subject.selected)
+      ? INTAKE.subject.selected.length > 0
+      : !!INTAKE.subject.selected;
+    const ok = INTAKE.grade.selected && subjectOk && INTAKE.concern.selected;
     if (btn) btn.disabled = !ok;
   }
 
   function submitIntake() {
-    const summary = `年級：${INTAKE.grade.selected}｜科目：${INTAKE.subject.selected}｜擔心：${INTAKE.concern.selected}`;
+    const subjectStr = Array.isArray(INTAKE.subject.selected)
+      ? INTAKE.subject.selected.join('、')
+      : INTAKE.subject.selected;
+    const summary = `年級：${INTAKE.grade.selected}｜科目：${subjectStr}｜擔心：${INTAKE.concern.selected}`;
     formEl.remove();
     formEl = null;
     appendMessage('user', summary);
